@@ -7,8 +7,8 @@ DROP TABLE StudyBranch IF EXISTS
 -- Etudiant --
 CREATE TABLE Student (
 	id INTEGER IDENTITY,
-	name VARCHAR(30) NOT NULL,
-	firsname VARCHAR(30) NOT NULL,
+	lastname VARCHAR(30) NOT NULL,
+	firstname VARCHAR(30) NOT NULL,
 	StudyBranchID INTEGER NOT NULL
 );
 
