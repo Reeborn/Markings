@@ -1,5 +1,8 @@
 package fr.miage.coo.factories;
 
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -12,12 +15,21 @@ public class StudentFactory {
 
 	private static StudentFactory instance;
 	private final List<Student> studentList;
+	private final PreparedStatement createQuery;
+	private final PreparedStatement searchByIdQuery;
+	private final PreparedStatement searchByNameQuery;
+	private final PreparedStatement searchByStudyBranchQuery;
+	private Connection conn;
 
-	private StudentFactory() {
+	private StudentFactory() throws SQLException {
 		studentList = new ArrayList<Student>();
+		createQuery = conn.prepareStatement("insert into student(lastName, firstName, studyBranch) values (?,?,?)");
+		searchByIdQuery = conn.prepareStatement("select * from student where id=?");
+		searchByNameQuery = conn.prepareStatement("select * from student where firstName=?");
+		searchByStudyBranchQuery = conn.prepareStatement("select * from student where studyBranch=?");
 	}
 
-	public static StudentFactory getInstance() {
+	public static StudentFactory getInstance() throws SQLException {
 		if (instance == null) {
 			instance = new StudentFactory();
 		}
