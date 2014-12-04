@@ -2,19 +2,15 @@ package fr.miage.coo.factories;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
+import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
 
 import fr.miage.coo.entities.Student;
-import fr.miage.coo.exceptions.EntityException;
 
 public class StudentFactory {
-	private static final String STUDENT_NOT_EXIST = "Student does not exists";
-	private static final String STUDENT_ALREADY_EXIST = "Student already exists";
-
 	private static StudentFactory instance;
-	private final List<Student> studentList;
 	private final PreparedStatement createQuery;
 	private final PreparedStatement searchByIdQuery;
 	private final PreparedStatement searchByNameQuery;
@@ -22,10 +18,9 @@ public class StudentFactory {
 	private Connection conn;
 
 	private StudentFactory() throws SQLException {
-		studentList = new ArrayList<Student>();
 		createQuery = conn.prepareStatement("insert into student(lastName, firstName, studyBranch) values (?,?,?)");
 		searchByIdQuery = conn.prepareStatement("select * from student where id=?");
-		searchByNameQuery = conn.prepareStatement("select * from student where firstName=?");
+		searchByNameQuery = conn.prepareStatement("select * from student where firstName=? and lastName=?");
 		searchByStudyBranchQuery = conn.prepareStatement("select * from student where studyBranch=?");
 	}
 
@@ -37,32 +32,58 @@ public class StudentFactory {
 	}
 
 	@SuppressWarnings("unused")
-	// A revoir tous les cas possibles
-	private Student createStudent(int id, String firstName, String lastName) throws EntityException {
-		Student student = searchStudent(id);
+	private Student createStudent(int id, String firstName, String lastName, int branchId) throws SQLException {
+		Student student = searchStudentByName(firstName, lastName);
 		if (student == null) {
-			if (searchStudent(firstName, lastName) == null)
-				return new Student(id, firstName, lastName);
+			createQuery.clearParameters();
+			createQuery.setString(1, lastName);
+			createQuery.setString(2, firstName);
+			createQuery.setInt(3, branchId);
+			createQuery.executeUpdate();
+			student = new Student(id, firstName, lastName);
 		}
-		throw new EntityException(STUDENT_ALREADY_EXIST);
+		return student;
 	}
 
-	private Student searchStudent(int id) throws EntityException {
-		for (Student student : studentList) {
-			if (student.getStudentId() == id) {
-				return student;
-			}
+	private Student searchStudentById(int id) throws SQLException {
+		searchByIdQuery.clearParameters();
+		searchByIdQuery.setInt(1, id);
+
+		ResultSet rs = searchByIdQuery.executeQuery();
+		if (!rs.next()) {
+			return null;
 		}
-		throw new EntityException(STUDENT_NOT_EXIST);
+
+		Student student = new Student(id, rs.getString(2), rs.getString(3));
+		return student;
 	}
 
-	private Student searchStudent(String firstName, String lastName) throws EntityException {
-		for (Student student : studentList) {
-			if (student.getLastName().equals(lastName) && student.getFirstName().equals(firstName)) {
-				return student;
-			}
+	private Student searchStudentByName(String firstName, String lastName) throws SQLException {
+		searchByNameQuery.clearParameters();
+		searchByNameQuery.setString(1, firstName);
+		searchByNameQuery.setString(2, lastName);
+
+		ResultSet rs = searchByNameQuery.executeQuery();
+		if (!rs.next()) {
+			return null;
 		}
-		throw new EntityException(STUDENT_NOT_EXIST);
+
+		Student student = new Student(rs.getInt(1), rs.getString(2), rs.getString(3));
+		return student;
+	}
+
+	private List<Student> searchStudentByBranch(int studyBranchId) throws SQLException {
+		List<Student> studentsInBranch = new ArrayList<Student>();
+		searchByStudyBranchQuery.clearParameters();
+		searchByStudyBranchQuery.setInt(1, studyBranchId);
+
+		ResultSet rs = searchByStudyBranchQuery.executeQuery();
+		while (rs.next()) {
+			Student student = new Student(rs.getInt(1), rs.getString(2), rs.getString(3));
+			studentsInBranch.add(student);
+		}
+
+		return studentsInBranch;
 	}
 
 }

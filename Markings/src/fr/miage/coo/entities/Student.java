@@ -6,7 +6,7 @@ public class Student {
 	private final String lastName;
 	private final String firstName;
 
-	public Student(final int studentId, final String firstName, final String lastName) {
+	public Student(final int studentId, final String lastName, final String firstName) {
 		this.studentId = studentId;
 		this.lastName = lastName;
 		this.firstName = firstName;
