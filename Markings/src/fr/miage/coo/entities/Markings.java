@@ -3,12 +3,12 @@ package fr.miage.coo.entities;
 public class Markings {
 	private int teachingUnitId;
 	private int studentId;
-	private double mark;
+	private double value;
 
 	public Markings(final int teachingUnitId, final int studentId, double mark) {
 		this.teachingUnitId = teachingUnitId;
 		this.studentId = studentId;
-		this.mark = mark;
+		this.value = mark;
 	}
 
 	public int getTeachingUnitId() {
@@ -28,11 +28,11 @@ public class Markings {
 	}
 
 	public double getMark() {
-		return mark;
+		return value;
 	}
 
 	public void setMark(double mark) {
-		this.mark = mark;
+		this.value = mark;
 	}
 
 }
